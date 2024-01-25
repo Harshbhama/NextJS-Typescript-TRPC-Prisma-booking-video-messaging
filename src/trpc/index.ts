@@ -19,12 +19,26 @@ export const appRouter = router({
           id: user.id,
           email: user.email,
           firstName: user.given_name,
-          lastName: user.family_name
+          lastName: user.family_name,
+          profilePic: ""
         }
       })
     } 
     return {success: true}
   }),
+
+  getAllUsers: privateProcedure.query(async({ctx}) => {
+    const {userId, user} = ctx;
+
+    return await db.user.findMany({
+      where : {
+        NOT: {
+          id: userId
+        }
+      }
+    })
+  }),
+
   getUserFriends: privateProcedure.query(async ({ctx}) => {
     const {userId, user} = ctx;
     // return await db.$queryRaw`Select "user".id, email, "firstName", "lastName", json_agg(friends_id) as friends_id from "user"

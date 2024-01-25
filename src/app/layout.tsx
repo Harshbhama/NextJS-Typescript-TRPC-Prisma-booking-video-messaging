@@ -4,6 +4,7 @@ import "./globals.css";
 import Providers from "@/components/Providers";
 import Navbar from "@/components/Navbar";
 import SideBar from "@/components/Sidebar";
+import { ThemeProvider } from "@/components/theme-provider";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
@@ -24,12 +25,17 @@ export default function RootLayout({
           <div className="flex flex-row">
             <SideBar />
             <div className="flex flex-col flex-auto">
-              <Navbar/>
+              <Navbar />
               <div className="">
-              {children}
+                  {/* <ThemeProvider
+                    attribute="class"
+                    defaultTheme="dark"
+                    enableSystem
+                    disableTransitionOnChange
+                  > */}
+                  {children}
+                {/* </ThemeProvider> */}
               </div>
-             
-             
             </div>
           </div>
         </body>

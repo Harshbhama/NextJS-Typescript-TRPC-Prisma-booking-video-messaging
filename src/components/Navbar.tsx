@@ -1,6 +1,7 @@
 import { buttonVariants } from "@/components/ui/button";
 import Link from "next/link";
 import { LoginLink, RegisterLink, getKindeServerSession, LogoutLink } from "@kinde-oss/kinde-auth-nextjs/server";
+import { KindeUser } from "@kinde-oss/kinde-auth-nextjs/dist/types";
 import { ArrowRight, User, CreditCard, Settings} from "lucide-react";
 import {
   DropdownMenu,
@@ -13,9 +14,8 @@ import {
   DropdownMenuShortcut,
 } from "@/components/ui/dropdown-menu"
 
-const UserMethod = async () => {
-  const {getUser} = getKindeServerSession();
-  const user = await getUser();
+const UserMethod = async ({user}: KindeUser|any) => {
+ 
   return(
     <div>
       <DropdownMenu>
@@ -23,7 +23,7 @@ const UserMethod = async () => {
         <User className="cursor-pointer"/>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel className="capitalize">{user?.given_name} {user?.family_name}</DropdownMenuLabel>
+        <DropdownMenuLabel className="capitalize flex items-center gap-1 text-[10px]">{user?.given_name} {user?.family_name} | <span className="lowercase ">{user?.email}</span></DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuGroup>
           <DropdownMenuItem className="cursor-pointer">
@@ -48,9 +48,11 @@ const UserMethod = async () => {
 
 
 const Navbar = async ({}) => {
+  const {getUser} = getKindeServerSession();
+  const user = await getUser();
   return (
       <nav className="sticky h-14 inset-x-0 top-0 z-30 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all">
-        <div className="container">
+        <div className="container px-32">
           <div className="flex h-14 items-center justify-between border-b border-zinc-200">
             <Link href="/" className="flex z-400 font-semibold">
               <span>Booking Software</span>
@@ -61,8 +63,8 @@ const Navbar = async ({}) => {
               <>
                 {/* <User className=" cursor-pointer"/> */}
                 {/* @ts-expect-error Async Server Component */}
-                <UserMethod />
-                <LoginLink
+                <UserMethod user={user}/>
+               {!user &&  <LoginLink
                   className={buttonVariants({
                     variant: "ghost",
                     size: "sm",
@@ -70,22 +72,22 @@ const Navbar = async ({}) => {
                 >
                   {" "}
                   Sign in
-                </LoginLink>
-                <LogoutLink  className={buttonVariants({
+                </LoginLink>}
+                {user && <LogoutLink  className={buttonVariants({
                     variant: "ghost",
                     size: "sm",
                   })}>
                   {" "}
                   Sign out
-                </LogoutLink>
-                <RegisterLink
+                </LogoutLink>}
+                {!user && <RegisterLink
                   className={buttonVariants({
                     size: "sm",
                   })}
                 >
                   {" "}
                   Get Started <ArrowRight className="ml-1.5" />
-                </RegisterLink>
+                </RegisterLink>}
               </>
             </div>
           </div>

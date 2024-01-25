@@ -16,6 +16,7 @@ model user {
   firstName String
   lastName  String
   Friends   friends[]
+  profilePic String
 }
 
 model friends {
@@ -23,4 +24,8 @@ model friends {
   user   user?   @relation(fields: [userId], references: [id])
   userId String? @map(name: "user_id")
   friendsId String? @map(name: "friends_id")
+  email     String
+  firstName String
+  lastName  String
+  profilePic String
 }
