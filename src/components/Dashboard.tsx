@@ -4,15 +4,11 @@ import InnerDashboard from "./InnerDashboard";
 const Dashboard = () => {
   const {data, isLoading} = trpc.getUserFriends.useQuery();
   const {data: allData, isLoading: allLoading} = trpc.getAllUsers.useQuery();
-  // console.log("data",data)
-  // console.log("allData",allData)
+  console.log("allData",allData)
   return(
     <div className="flex flex-row justify-between">
-      <div className="container">
+      <div className="container h-[90vh] mt-10 overflow-auto pb-5">
         <InnerDashboard />
-      </div>
-      <div className="hidden lg:block min-w-[200px] xl:min-w-[300px] bg-purple-50 h-[calc(100vh-56px)] text-center">
-        <p>My Pen Pals</p>
       </div>
     </div>
   )

@@ -39,6 +39,16 @@ export const appRouter = router({
     })
   }),
 
+  getUserWithId: privateProcedure.query(async({ctx}) => {
+    const {userId, user} = ctx;
+
+    return await db.user.findFirst({
+      where : {
+        id: userId
+      }
+    })
+  }),
+
   getUserFriends: privateProcedure.query(async ({ctx}) => {
     const {userId, user} = ctx;
     // return await db.$queryRaw`Select "user".id, email, "firstName", "lastName", json_agg(friends_id) as friends_id from "user"
@@ -55,6 +65,9 @@ export const appRouter = router({
       }
     })
   })
+
+
+
   // More procedures here
 });
 export type AppRouter = typeof appRouter;
