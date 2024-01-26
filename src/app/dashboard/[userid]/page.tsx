@@ -11,6 +11,7 @@ const Page = ({params}: UserProps) => {
   console.log(data);
   
   return(
+      
       <div className="container " >
       <UsersInfoForm />
     </div>
