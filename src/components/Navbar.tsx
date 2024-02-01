@@ -28,7 +28,7 @@ const UserMethod = async ({user}: KindeUser | any) => {
         <DropdownMenuGroup>
           <DropdownMenuItem className="cursor-pointer">
             <User className="mr-2 h-4 w-4" />
-            <span><Link href={`/dashboard/${user?.id}`}>Profile12</Link></span>
+            <span><Link href={`/dashboard/${user?.id}`}>Profile</Link></span>
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
        

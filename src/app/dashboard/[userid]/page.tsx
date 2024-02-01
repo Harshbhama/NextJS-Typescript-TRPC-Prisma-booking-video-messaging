@@ -7,13 +7,10 @@ interface UserProps {
   }
 }
 const Page = ({params}: UserProps) => {
-  const {data, isLoading} = trpc.getUserWithId.useQuery()
-  console.log(data);
-  
   return(
       
       <div className="container " >
-      <UsersInfoForm />
+      <UsersInfoForm userid={params.userid}/>
     </div>
   )
 }

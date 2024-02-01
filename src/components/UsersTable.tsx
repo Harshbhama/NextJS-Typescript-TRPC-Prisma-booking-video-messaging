@@ -1,3 +1,5 @@
+import { trpc } from "@/app/_trpc/client";
+import { makeUsersTableData } from "@/lib/utils";
 import {
     MagnifyingGlassIcon,
     ChevronUpDownIcon,
@@ -19,23 +21,24 @@ import {
     IconButton,
     Tooltip,
   } from "@material-tailwind/react";
-   
+  import { tableHead } from "@/lib/types";
+import { useMutation } from "@tanstack/react-query";
   const TABS = [
     {
       label: "All",
       value: "all",
     },
     {
-      label: "Monitored",
-      value: "monitored",
+      label: "Friends",
+      value: "friends",
     },
-    {
-      label: "Unmonitored",
-      value: "unmonitored",
-    },
+    // {
+    //   label: "Unmonitored",
+    //   value: "unmonitored",
+    // },
   ];
    
-  const TABLE_HEAD = ["Member", "Function", "Status", "Employed", ""];
+  const TABLE_HEAD = ["Member", "Status", ""];
    
   const TABLE_ROWS = [
     {
@@ -84,8 +87,27 @@ import {
       date: "04/10/21",
     },
   ];
-   
+  
   export function SortableTable() {
+    const {data: allData, isLoading: allLoading} = trpc.getAllUsers.useQuery();
+    let formattedData: tableHead [] | null  = allData ? makeUsersTableData(allData): null;
+
+    const {mutate: addFriendRequest} = trpc.sendFriendRequest.useMutation({
+      onSuccess: (data) => {
+        if(data?.status === "Request already sent"){
+          console.log("Not required further, send toast msg as -- Request already sent")
+        }else{
+          console.log("Request sent successfully")
+        }
+      },
+      onError: (data) => {
+        console.log("In Error handler", data);
+      }
+      // onMutate : ({friendsId}) => {
+
+      // }
+    })
+
     return (
       <Card className="h-full w-full">
         <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -150,12 +172,12 @@ import {
               </tr>
             </thead>
             <tbody>
-              {TABLE_ROWS.map(
-                ({ img, name, email, job, org, online, date }, index) => {
+              {formattedData && formattedData.map(
+                ({ img, name, email, online, friendsId }, index) => {
                   const isLast = index === TABLE_ROWS.length - 1;
                   const classes = isLast
                     ? "p-4"
-                    : "p-4 border-b border-blue-gray-50";
+                    : "p-4 border-b border-blue-gray-50" ;
    
                   return (
                     <tr key={name}>
@@ -180,7 +202,7 @@ import {
                           </div>
                         </div>
                       </td>
-                      <td className={classes}>
+                      {/* <td className={classes}>
                         <div className="flex flex-col">
                           <Typography
                             variant="small"
@@ -197,7 +219,7 @@ import {
                             {org}
                           </Typography>
                         </div>
-                      </td>
+                      </td> */}
                       <td className={classes}>
                         <div className="w-max">
                           <Chip
@@ -208,7 +230,7 @@ import {
                           />
                         </div>
                       </td>
-                      <td className={classes}>
+                      {/* <td className={classes}>
                         <Typography
                           variant="small"
                           color="blue-gray"
@@ -216,13 +238,15 @@ import {
                         >
                           {date}
                         </Typography>
-                      </td>
-                      <td className={classes}>
-                        <Tooltip content="Edit User">
+                      </td> */}
+                      <td className={classes + " flex gap-10"}>
+                        <Button>Set Meeting</Button>
+                        <Button onClick={() => addFriendRequest({friendsId:friendsId})}>Add Friend</Button>
+                        {/* <Tooltip content="Edit User">
                           <IconButton variant="text">
                             <PencilIcon className="h-4 w-4" />
                           </IconButton>
-                        </Tooltip>
+                        </Tooltip> */}
                       </td>
                     </tr>
                   );

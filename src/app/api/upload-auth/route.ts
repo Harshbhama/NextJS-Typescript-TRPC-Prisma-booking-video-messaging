@@ -15,14 +15,34 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
   const buffer = Buffer.from(arrayBuffer);
   const headersList = headers()
   const fileName = headersList.get('inputData')
-  return new Promise((resolve, reject) => {
+  const userId: any = headersList.get('userid')
+  const textProps: any = JSON.parse(headersList.get('textProps')!)
+ 
+  return new Promise(async (resolve, reject) => {
     imagekit.upload({
       file : buffer,
       fileName : fileName,
-    }, function(error: any, result: any) {
+    }, async function(error: any, result: any) {
       if(error) {
         reject(NextResponse.json({ error: error}, { status: 500 }))
       }else{
+
+        try{
+          await db.user.update({
+            where: {
+              id: userId
+            },
+            data: {
+              profilePic: result?.url,
+              firstName: textProps?.firstName,
+              lastName: textProps?.famiyName
+            }
+          })
+        }
+        catch(err){
+          reject(NextResponse.json({ error: err}, { status: 500 }))
+
+        } 
         resolve(NextResponse.json({ status: 201 }))
       }
     });

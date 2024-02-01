@@ -1,3 +1,4 @@
+"use client"
 import {
   Card,
   Input,
@@ -7,23 +8,35 @@ import {
 } from "@material-tailwind/react";
 import { useForm } from "react-hook-form";
 import FileUpload from "./FileUpload";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "@tanstack/react-query";
-export function UsersInfoForm() {
+import { trpc } from "@/app/_trpc/client";
+import { KindeUser } from "@kinde-oss/kinde-auth-nextjs/dist/types";
+import Image from "next/image";
+export function UsersInfoForm({userid}: KindeUser | any) {
   const [file, setFile] = useState<any>("");
-  const [inputProps, setInput] = useState({
-    description: "",
-    title: ""
-  })
+  const {data: userData, isLoading} = trpc.getUserWithId.useQuery()
+  const [firstName, setFirstName] = useState<string|undefined>("")
+  const [familyName, setFamilyName] = useState<string|undefined>("")
+  const utils = trpc.useContext()
 
+  useEffect(() => {
+    setFirstName(userData?.firstName)
+    setFamilyName(userData?.lastName)
+  },[userData])
   const {mutate} = useMutation({ // Using React Query approach
-    mutationFn: async ({data}: any) => {
+    mutationFn: async () => {
       const response = await fetch('/api/upload-auth', {
         method: 'POST',
         body:  file,
         headers: {
           "Content-Type": "multipart/form-data",
-          inputData: JSON.stringify(file?.name)
+          inputData: JSON.stringify(file?.name),
+          userid: userid,
+          textProps: JSON.stringify({
+            firstName: firstName,
+            familyName: familyName
+          })
         },
       })
       if(!response.ok){
@@ -37,22 +50,15 @@ export function UsersInfoForm() {
     },
     onSuccess: (data, variables, context) => {
       // Boom baby!
-      console.log("In success",data)
+      utils.getUserWithId.invalidate()
     },
   })
 
   const onSubmit = async () => {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('fileName', file.name);
     if(!file){
       alert("PLease upload file")
     }
-    let data = {
-      formData: formData ,
-      inputProps: inputProps
-    }
-    await mutate({data});
+    await mutate();
   }
 
   
@@ -75,6 +81,8 @@ export function UsersInfoForm() {
               className: "before:content-none after:content-none",
             }}
             crossOrigin={'input'}
+            value={firstName}
+            onChange={(e) => setFirstName(e.target.value)}
           />
           <Typography variant="h6" color="blue-gray" className="-mb-3 whitespace-nowrap">
             Family Name
@@ -87,8 +95,17 @@ export function UsersInfoForm() {
               className: "before:content-none after:content-none",
             }}
             crossOrigin={'input'}
+            value={familyName}
+            onChange={(e) => setFamilyName(e.target.value)}
+
           />
           <div className="flex items-center gap-[15px]">
+           {userData?.profilePic && <Image src={userData?.profilePic!} 
+            width={40}
+            height={40}
+            className="rounded-[20px] h-[40px]"
+            alt="Picture of the author"
+            />}
             <FileUpload fileProps={{name: "Upload Snap !", className: "w-2/4 bg-[#6495ed] rounded-[28px] w-[145px]"}} setFile={setFile}/>
             {file && <p>{file?.name}</p>}
           </div>

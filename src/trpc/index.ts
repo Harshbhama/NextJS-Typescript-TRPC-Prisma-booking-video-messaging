@@ -2,6 +2,7 @@ import { getKindeServerSession } from "@kinde-oss/kinde-auth-nextjs/server";
 import { privateProcedure, publicProcedure, router } from "./trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
+import { z } from "zod";
 export const appRouter = router({
   authCallback: publicProcedure.query(async () => {
     const { getUser } = getKindeServerSession();
@@ -44,7 +45,7 @@ export const appRouter = router({
 
     return await db.user.findFirst({
       where : {
-        id: userId
+         id: userId
       }
     })
   }),
@@ -64,8 +65,30 @@ export const appRouter = router({
         Friends: true
       }
     })
+  }),
+  sendFriendRequest: privateProcedure.input(z.object({friendsId: z.string()})).mutation(async ({ctx, input}) => {
+    const {userId, user} = ctx;
+    let checkForExisting: [] = await db.$queryRaw`Select public.user.id, friend_requests.friends_request_id from public.user 
+    left join friend_requests
+    on public.user.id = friend_requests."userId"
+    where public.user.id = ${userId} and friends_request_id = ${input.friendsId}`
+    if(!!checkForExisting?.length){
+      // throw new TRPCError({code: "NOT_FOUND"})
+      return {status: 'Request already sent' as const}
+    }
+    try{ 
+      let createRequest = await db.friend_requests.create({
+        data: {
+         userId: userId,
+         friendsRequestId: input.friendsId
+        }
+      })
+      return {status: 'Request sent successfully' as const, msg: createRequest}
+    } catch(err){
+      throw new TRPCError({code: "INTERNAL_SERVER_ERROR"})
+    }
+   
   })
-
 
 
   // More procedures here
