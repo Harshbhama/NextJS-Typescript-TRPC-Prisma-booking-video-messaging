@@ -68,27 +68,47 @@ export const appRouter = router({
   }),
   sendFriendRequest: privateProcedure.input(z.object({friendsId: z.string()})).mutation(async ({ctx, input}) => {
     const {userId, user} = ctx;
+
+    // Condition 1
     let checkForExisting: [] = await db.$queryRaw`Select public.user.id, friend_requests.friends_request_id from public.user 
     left join friend_requests
     on public.user.id = friend_requests."userId"
     where public.user.id = ${userId} and friends_request_id = ${input.friendsId}`
-    if(!!checkForExisting?.length){
+
+    // Condition 2
+    let checkForExistingOutgoing: [] = await db.$queryRaw`Select public.user.id, friend_requests.friends_request_id from public.user 
+    left join friend_requests
+    on public.user.id = friend_requests."userId"
+    where public.user.id = ${input.friendsId} and friends_request_id = ${userId}`
+    console.log("checkForExistingOutgoing",checkForExistingOutgoing)
+
+    if(!!checkForExisting?.length || !!checkForExistingOutgoing?.length){
       // throw new TRPCError({code: "NOT_FOUND"})
       return {status: 'Request already sent' as const}
     }
     try{ 
       let createRequest = await db.friend_requests.create({
         data: {
-         userId: userId,
-         friendsRequestId: input.friendsId
+         userId: input.friendsId,
+         friendsRequestId: userId
         }
       })
       return {status: 'Request sent successfully' as const, msg: createRequest}
     } catch(err){
       throw new TRPCError({code: "INTERNAL_SERVER_ERROR"})
     }
-   
-  })
+  }),
+  getFriendRequest: privateProcedure.query(async ({ctx}) => {
+    const {userId, user} = ctx;
+    return await db.user.findMany({
+      where: {
+        id: userId
+      },
+      include: {
+        FriendRequests: true
+      }
+    })
+  }),
 
 
   // More procedures here

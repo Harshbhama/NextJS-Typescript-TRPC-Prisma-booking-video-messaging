@@ -1,5 +1,6 @@
 import { trpc } from "@/app/_trpc/client";
 import { makeUsersTableData } from "@/lib/utils";
+
 import {
     MagnifyingGlassIcon,
     ChevronUpDownIcon,
@@ -23,10 +24,15 @@ import {
   } from "@material-tailwind/react";
   import { tableHead } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
+import { toast } from "react-toastify";
   const TABS = [
     {
       label: "All",
       value: "all",
+    },
+    {
+      label: "Requests",
+      value: "requests",
     },
     {
       label: "Friends",
@@ -91,13 +97,18 @@ import { useMutation } from "@tanstack/react-query";
   export function SortableTable() {
     const {data: allData, isLoading: allLoading} = trpc.getAllUsers.useQuery();
     let formattedData: tableHead [] | null  = allData ? makeUsersTableData(allData): null;
-
+    const {data: friendRequests, isLoading} = trpc.getFriendRequest.useQuery();
+    console.log("friendRequests",friendRequests)
+    const utils = trpc.useContext()
     const {mutate: addFriendRequest} = trpc.sendFriendRequest.useMutation({
       onSuccess: (data) => {
         if(data?.status === "Request already sent"){
+          // toast("Request already sent")
           console.log("Not required further, send toast msg as -- Request already sent")
         }else{
+          // toast("Request sent successfully")
           console.log("Request sent successfully")
+          utils.getFriendRequest.invalidate()
         }
       },
       onError: (data) => {
@@ -124,9 +135,9 @@ import { useMutation } from "@tanstack/react-query";
               <Button variant="outlined" size="sm">
                 view all
               </Button>
-              <Button className="flex items-center gap-3" size="sm">
+              {<Button className="flex items-center gap-3" size="sm">
                 <UserPlusIcon strokeWidth={2} className="h-4 w-4" /> Add member
-              </Button>
+              </Button>}
             </div>
           </div>
           <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
@@ -174,11 +185,11 @@ import { useMutation } from "@tanstack/react-query";
             <tbody>
               {formattedData && formattedData.map(
                 ({ img, name, email, online, friendsId }, index) => {
-                  const isLast = index === TABLE_ROWS.length - 1;
+                  const isLast = index === formattedData!.length - 1;
                   const classes = isLast
                     ? "p-4"
                     : "p-4 border-b border-blue-gray-50" ;
-   
+                  const checkForFriendRequest = friendRequests![0]?.FriendRequests?.find(x => x.friendsRequestId === friendsId)
                   return (
                     <tr key={name}>
                       <td className={classes}>
@@ -202,24 +213,7 @@ import { useMutation } from "@tanstack/react-query";
                           </div>
                         </div>
                       </td>
-                      {/* <td className={classes}>
-                        <div className="flex flex-col">
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal"
-                          >
-                            {job}
-                          </Typography>
-                          <Typography
-                            variant="small"
-                            color="blue-gray"
-                            className="font-normal opacity-70"
-                          >
-                            {org}
-                          </Typography>
-                        </div>
-                      </td> */}
+                     
                       <td className={classes}>
                         <div className="w-max">
                           <Chip
@@ -230,23 +224,9 @@ import { useMutation } from "@tanstack/react-query";
                           />
                         </div>
                       </td>
-                      {/* <td className={classes}>
-                        <Typography
-                          variant="small"
-                          color="blue-gray"
-                          className="font-normal"
-                        >
-                          {date}
-                        </Typography>
-                      </td> */}
                       <td className={classes + " flex gap-10"}>
                         <Button>Set Meeting</Button>
                         <Button onClick={() => addFriendRequest({friendsId:friendsId})}>Add Friend</Button>
-                        {/* <Tooltip content="Edit User">
-                          <IconButton variant="text">
-                            <PencilIcon className="h-4 w-4" />
-                          </IconButton>
-                        </Tooltip> */}
                       </td>
                     </tr>
                   );

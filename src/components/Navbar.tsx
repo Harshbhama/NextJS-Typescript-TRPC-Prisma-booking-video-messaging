@@ -31,7 +31,13 @@ const UserMethod = async ({user}: KindeUser | any) => {
             <span><Link href={`/dashboard/${user?.id}`}>Profile</Link></span>
             <DropdownMenuShortcut>⇧⌘P</DropdownMenuShortcut>
           </DropdownMenuItem>
-       
+
+          <DropdownMenuItem className="cursor-pointer">
+            <Settings className="mr-2 h-4 w-4" />
+            <span>Friend Requests</span>
+            <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+          </DropdownMenuItem>
+
           <DropdownMenuItem className="cursor-pointer">
             <Settings className="mr-2 h-4 w-4" />
             <span>Settings</span>
