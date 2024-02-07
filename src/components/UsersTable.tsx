@@ -97,18 +97,17 @@ import { toast } from "react-toastify";
   export function SortableTable() {
     const {data: allData, isLoading: allLoading} = trpc.getAllUsers.useQuery();
     let formattedData: tableHead [] | null  = allData ? makeUsersTableData(allData): null;
-    const {data: friendRequests, isLoading} = trpc.getFriendRequest.useQuery();
-    console.log("friendRequests",friendRequests)
+    const { data: friendRequests } = trpc.getFriendRequest.useQuery()
     const utils = trpc.useContext()
     const {mutate: addFriendRequest} = trpc.sendFriendRequest.useMutation({
       onSuccess: (data) => {
-        if(data?.status === "Request already sent"){
+        if(data?.error){
           // toast("Request already sent")
-          console.log("Not required further, send toast msg as -- Request already sent")
+          console.log(data?.status)
         }else{
           // toast("Request sent successfully")
           console.log("Request sent successfully")
-          utils.getFriendRequest.invalidate()
+          // utils.getFriendRequest.invalidate()
         }
       },
       onError: (data) => {
@@ -118,7 +117,6 @@ import { toast } from "react-toastify";
 
       // }
     })
-
     return (
       <Card className="h-full w-full">
         <CardHeader floated={false} shadow={false} className="rounded-none">
@@ -189,7 +187,7 @@ import { toast } from "react-toastify";
                   const classes = isLast
                     ? "p-4"
                     : "p-4 border-b border-blue-gray-50" ;
-                  const checkForFriendRequest = friendRequests![0]?.FriendRequests?.find(x => x.friendsRequestId === friendsId)
+                  // const checkForFriendRequest = friendRequests![0]?.FriendRequests?.find(x => x.friendsRequestId === friendsId)
                   return (
                     <tr key={name}>
                       <td className={classes}>

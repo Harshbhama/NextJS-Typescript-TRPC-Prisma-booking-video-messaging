@@ -84,7 +84,12 @@ export const appRouter = router({
 
     if(!!checkForExisting?.length || !!checkForExistingOutgoing?.length){
       // throw new TRPCError({code: "NOT_FOUND"})
-      return {status: 'Request already sent' as const}
+      if(checkForExisting?.length){
+        return {error: true, status: 'Request came from this user, please accept it.' as const}
+      }else{
+        return {error: true, status: 'Request already sent to the user' as const}
+      }
+      
     }
     try{ 
       let createRequest = await db.friend_requests.create({
@@ -93,21 +98,38 @@ export const appRouter = router({
          friendsRequestId: userId
         }
       })
-      return {status: 'Request sent successfully' as const, msg: createRequest}
+      return {error: false,status: 'Request sent successfully' as const, msg: createRequest}
     } catch(err){
       throw new TRPCError({code: "INTERNAL_SERVER_ERROR"})
     }
   }),
   getFriendRequest: privateProcedure.query(async ({ctx}) => {
-    const {userId, user} = ctx;
-    return await db.user.findMany({
-      where: {
-        id: userId
-      },
-      include: {
-        FriendRequests: true
-      }
+    return new Promise(async (resolve, reject) => {
+      const {userId, user} = ctx;
+      let friendRequests =  await db.user.findMany({
+        where: {
+          id: userId
+        },
+        include: {
+          FriendRequests: true
+        }
+      })
+      let finalUsers: any = []; 
+      friendRequests[0]?.FriendRequests.forEach(async (friend, index) => {
+        const friendsRequestId = friend?.friendsRequestId
+        let user = await db.user.findMany({
+          where: {
+            id: friendsRequestId!
+          },
+        })
+        finalUsers.push(user[0])
+        if(finalUsers?.length === friendRequests[0]?.FriendRequests?.length){
+          resolve ({data: finalUsers})
+        }
+      })
     })
+    
+    // console.log("k", k)
   }),
 
 
