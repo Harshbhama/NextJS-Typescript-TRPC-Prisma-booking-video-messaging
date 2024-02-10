@@ -103,7 +103,6 @@ import { useEffect, useState } from "react";
     let formattedData: tableHead [] | null  = allData ? makeUsersTableData(allData): null;
     const { data: friendRequests } = trpc.getFriendRequest.useQuery()
     const { data: currentFriends} = trpc.getFriends.useQuery()
-    console.log("currentFriends",currentFriends)
     // @ts-ignore
     let formattedRequestsData = friendRequests ? makeUsersTableData(friendRequests): null; 
     // @ts-ignore
@@ -242,7 +241,9 @@ import { useEffect, useState } from "react";
                       </td> : tabValue === "requests" ?
                        <td className={classes + " flex gap-10"}>
                         <Button className="bg-[#0000ffa6]" >Send Meeting requests</Button>
-                        <Button className="bg-[#008048b3]" onClick={() => acceptRequestMutation({friendsId:friendsId})}>Accept Request</Button>
+                        <Button className="bg-[#008048b3]" onClick={() => acceptRequestMutation(
+                          {friendsId:friendsId}
+                          )}>Accept Request</Button>
                       </td> : <td className={classes + " flex gap-10"}>
                         <Button className="bg-[#0000ffa6]" >Send Meeting requests</Button>
                         <Button className="bg-[#008048b3]" >Chat</Button>

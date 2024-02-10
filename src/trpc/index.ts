@@ -106,36 +106,7 @@ export const appRouter = router({
   }),
   getFriendRequest: privateProcedure.query(async ({ctx}) => {
     const {userId, user} = ctx;
-    // return new Promise(async (resolve, reject) => {
-    //   const {userId, user} = ctx;
-    //   let friendRequests =  await db.user.findMany({
-    //     where: {
-    //       id: userId
-    //     },
-    //     include: {
-    //       FriendRequests: true
-    //     }
-    //   })
-    //   let finalUsers: userType [] = []; 
-    //   if(!!friendRequests[0]?.FriendRequests?.length) {
-    //     friendRequests[0]?.FriendRequests.forEach(async (friend, index) => {
-    //       const friendsRequestId = friend?.friendsRequestId
-    //       let user = await db.user.findMany({
-    //         where: {
-    //           id: friendsRequestId!
-    //         },
-    //       })
-    //       finalUsers.push(user[0])
-    //       if(finalUsers?.length === friendRequests[0]?.FriendRequests?.length){
-    //         resolve (finalUsers)
-    //       }
-    //     })
-    //   }else{
-    //     resolve(finalUsers)
-    //   }
-      
-    // })
-    return await db.$queryRaw`Select uu2.id, uu2.email AS user_email, fk.friends_request_id, uu1.email AS email, uu1."firstName" AS "firstName",
+    return await db.$queryRaw`Select uu1.id, uu2.email AS user_email, fk.friends_request_id, uu1.email AS email, uu1."firstName" AS "firstName",
     uu1."lastName" AS "lastName", uu1."profilePic" AS "profilePic"
     FROM friend_requests fk
     JOIN public.user AS uu1 ON uu1.id = fk.friends_request_id
@@ -146,28 +117,25 @@ export const appRouter = router({
     return new Promise(async (resolve, reject) => {
       const {userId, user} = ctx;
       try{
-        let deleteFromFriendsTable = await db.friend_requests.delete({
-          // @ts-ignore
-          where: {
-            AND: [
-              
-              {
-                userId: userId
-              },
-              { 
-                friendsRequestId: input.friendsId
-               },
-            ],
-          } 
+        await db.$queryRaw`Delete from friend_requests fr 
+        where fr."userId" = ${userId} 
+        and fr.friends_request_id = ${input.friendsId}`
+
+        await db.friends.create({
+          data: {
+            userId: userId,
+            friendsId: input.friendsId
+          }
         })
-        resolve({error: false, msg: deleteFromFriendsTable})
+
+        resolve({error: false, msg: "Friend request accepeted successfully"})
       }catch(err){
         console.log(err)
         reject({error: true, msg: err})
        
       }
      
-    })
+      })
   }),
 
   getFriends: privateProcedure.query(async({ctx}) => {
