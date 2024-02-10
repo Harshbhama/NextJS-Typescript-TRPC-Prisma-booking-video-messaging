@@ -2,7 +2,6 @@
 import { trpc } from "@/app/_trpc/client";
 import InnerDashboard from "./InnerDashboard";
 const Dashboard = () => {
-  const {data, isLoading} = trpc.getUserFriends.useQuery();
   
   return(
     <div className="flex flex-row justify-between">

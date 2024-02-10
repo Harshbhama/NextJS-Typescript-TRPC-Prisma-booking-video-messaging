@@ -66,22 +66,7 @@ export const appRouter = router({
     })
   }),
 
-  getUserFriends: privateProcedure.query(async ({ctx}) => {
-    const {userId, user} = ctx;
-    // return await db.$queryRaw`Select "user".id, email, "firstName", "lastName", json_agg(friends_id) as friends_id from "user"
-    // Inner Join friends
-    // on "user".id = friends.user_id
-    // Group By "user".id
-    // Having "user".id=${userId}`
-    return await db.user.findMany({
-      where: {
-        id: userId
-      },
-      include: {
-        Friends: true
-      }
-    })
-  }),
+  
   sendFriendRequest: privateProcedure.input(z.object({friendsId: z.string()})).mutation(async ({ctx, input}) => {
     const {userId, user} = ctx;
 
@@ -183,6 +168,17 @@ export const appRouter = router({
       }
      
     })
+  }),
+
+  getFriends: privateProcedure.query(async({ctx}) => {
+    const {user, userId} = ctx;
+    return await db.$queryRaw`Select f.user_id as current_user, f.friends_id as f_id, uu1.*  FROM friends f 
+      JOIN public.user AS uu1 ON uu1.id = f.friends_id
+      where  f.user_id = ${userId}
+      Union
+      Select f.friends_id as current_user, f.user_id as f_id, uu2.* as fr_email FROM friends f 
+      JOIN public.user AS uu2 ON uu2.id = f.user_id
+      where f.friends_id = ${userId}`
   })
 
   // More procedures here

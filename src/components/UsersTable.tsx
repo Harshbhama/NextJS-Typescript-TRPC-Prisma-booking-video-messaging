@@ -102,10 +102,14 @@ import { useEffect, useState } from "react";
     // @ts-ignore
     let formattedData: tableHead [] | null  = allData ? makeUsersTableData(allData): null;
     const { data: friendRequests } = trpc.getFriendRequest.useQuery()
-    console.log("friendRequests",friendRequests)
+    const { data: currentFriends} = trpc.getFriends.useQuery()
+    console.log("currentFriends",currentFriends)
     // @ts-ignore
     let formattedRequestsData = friendRequests ? makeUsersTableData(friendRequests): null; 
-    formattedData = tabValue === "all" ? formattedData : formattedRequestsData
+    // @ts-ignore
+    let formattedFriends = currentFriends ? makeUsersTableData(currentFriends) : null;
+    formattedData = tabValue === "all" ? formattedData : tabValue === "requests" ? formattedRequestsData : formattedFriends
+    
     const utils = trpc.useContext()
     const {mutate: addFriendRequest} = trpc.sendFriendRequest.useMutation({
       onSuccess: (data) => {
