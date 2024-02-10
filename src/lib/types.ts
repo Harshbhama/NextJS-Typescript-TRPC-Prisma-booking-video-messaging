@@ -12,4 +12,11 @@ export interface tableHead {
     online: boolean;
     friendsId: string
 }
+export interface userType {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  profilePic: string;
+}
 //   export type { rawDataType as rawDataType }

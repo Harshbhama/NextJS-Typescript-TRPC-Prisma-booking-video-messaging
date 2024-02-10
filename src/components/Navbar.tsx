@@ -56,6 +56,7 @@ const UserMethod = async ({user}: KindeUser | any) => {
 const Navbar = async ({}) => {
   const {getUser} = getKindeServerSession();
   const user = await getUser();
+  console.log("user", user)
   return (
       <nav className="sticky h-14 inset-x-0 top-0 z-30 w-full border-b border-gray-200 bg-white/75 backdrop-blur-lg transition-all">
         <div className="container px-32">

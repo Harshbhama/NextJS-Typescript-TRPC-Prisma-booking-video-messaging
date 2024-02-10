@@ -1,6 +1,6 @@
 import { trpc } from "@/app/_trpc/client";
 import { makeUsersTableData } from "@/lib/utils";
-
+import { userType } from "@/lib/types";
 import {
     MagnifyingGlassIcon,
     ChevronUpDownIcon,
@@ -25,6 +25,7 @@ import {
   import { tableHead } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
+import { useEffect, useState } from "react";
   const TABS = [
     {
       label: "All",
@@ -43,7 +44,7 @@ import { toast } from "react-toastify";
     //   value: "unmonitored",
     // },
   ];
-   
+  
   const TABLE_HEAD = ["Member", "Status", ""];
    
   const TABLE_ROWS = [
@@ -95,27 +96,36 @@ import { toast } from "react-toastify";
   ];
   
   export function SortableTable() {
+    const [tabValue, setTabValue] = useState("all");
     const {data: allData, isLoading: allLoading} = trpc.getAllUsers.useQuery();
+    console.log("allData",allData)
+    // @ts-ignore
     let formattedData: tableHead [] | null  = allData ? makeUsersTableData(allData): null;
     const { data: friendRequests } = trpc.getFriendRequest.useQuery()
+    console.log("friendRequests",friendRequests)
+    // @ts-ignore
+    let formattedRequestsData = friendRequests ? makeUsersTableData(friendRequests): null; 
+    formattedData = tabValue === "all" ? formattedData : formattedRequestsData
     const utils = trpc.useContext()
     const {mutate: addFriendRequest} = trpc.sendFriendRequest.useMutation({
       onSuccess: (data) => {
         if(data?.error){
-          // toast("Request already sent")
           console.log(data?.status)
         }else{
-          // toast("Request sent successfully")
           console.log("Request sent successfully")
-          // utils.getFriendRequest.invalidate()
         }
       },
       onError: (data) => {
         console.log("In Error handler", data);
       }
-      // onMutate : ({friendsId}) => {
-
-      // }
+    })
+    const {mutate: acceptRequestMutation} = trpc.acceptRequests.useMutation({
+      onSuccess: (data) => {
+        console.log(data)
+      },
+      onError: (data) => {
+        console.log("In Error handler", data);
+      }
     })
     return (
       <Card className="h-full w-full">
@@ -142,8 +152,8 @@ import { toast } from "react-toastify";
             <Tabs value="all" className="w-full md:w-max">
               <TabsHeader>
                 {TABS.map(({ label, value }) => (
-                  <Tab key={value} value={value}>
-                    &nbsp;&nbsp;{label}&nbsp;&nbsp;
+                  <Tab key={value} value={value} onClick={() => setTabValue(value)}>
+                    &nbsp;&nbsp;<span>{label}</span>&nbsp;&nbsp;
                   </Tab>
                 ))}
               </TabsHeader>
@@ -222,10 +232,19 @@ import { toast } from "react-toastify";
                           />
                         </div>
                       </td>
-                      <td className={classes + " flex gap-10"}>
-                        <Button>Set Meeting</Button>
-                        <Button onClick={() => addFriendRequest({friendsId:friendsId})}>Add Friend</Button>
+                     {tabValue === "all" ? <td className={classes + " flex gap-10"}>
+                        <Button className="bg-[#0000ffa6]">Send Meeting requests</Button>
+                        <Button className="bg-[#008048b3]" onClick={() => addFriendRequest({friendsId:friendsId})}>Add Friend</Button>
+                      </td> : tabValue === "requests" ?
+                       <td className={classes + " flex gap-10"}>
+                        <Button className="bg-[#0000ffa6]" >Send Meeting requests</Button>
+                        <Button className="bg-[#008048b3]" onClick={() => acceptRequestMutation({friendsId:friendsId})}>Accept Request</Button>
+                      </td> : <td className={classes + " flex gap-10"}>
+                        <Button className="bg-[#0000ffa6]" >Send Meeting requests</Button>
+                        <Button className="bg-[#008048b3]" >Chat</Button>
                       </td>
+
+                      }
                     </tr>
                   );
                 },

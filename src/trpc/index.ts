@@ -3,6 +3,8 @@ import { privateProcedure, publicProcedure, router } from "./trpc";
 import { TRPCError } from "@trpc/server";
 import { db } from "@/db";
 import { z } from "zod";
+import { userType } from "@/lib/types";
+import { KindeUser } from "@kinde-oss/kinde-auth-nextjs/dist/types";
 export const appRouter = router({
   authCallback: publicProcedure.query(async () => {
     const { getUser } = getKindeServerSession();
@@ -29,15 +31,29 @@ export const appRouter = router({
   }),
 
   getAllUsers: privateProcedure.query(async({ctx}) => {
-    const {userId, user} = ctx;
-
-    return await db.user.findMany({
-      where : {
-        NOT: {
-          id: userId
-        }
+    return new Promise(async (resolve, reject) => {
+      try{
+        const {userId, user} = ctx;
+        console.log("userId",userId)
+        const data =  await db.$queryRaw`Select * from public.user where email != ${user?.email}`
+        console.log("data",data)
+        // return data
+        resolve(data)
+      }catch(err){
+        reject(err)
       }
+      
     })
+    
+    
+    // return await db.user.findMany({
+    //   where : {
+    //     NOT: {
+    //       id: userId
+    //     }
+    //   }
+    // })
+    // return await db.$queryRaw`Select * from user where id !=${userId} `
   }),
 
   getUserWithId: privateProcedure.query(async({ctx}) => {
@@ -104,34 +120,70 @@ export const appRouter = router({
     }
   }),
   getFriendRequest: privateProcedure.query(async ({ctx}) => {
+    const {userId, user} = ctx;
+    // return new Promise(async (resolve, reject) => {
+    //   const {userId, user} = ctx;
+    //   let friendRequests =  await db.user.findMany({
+    //     where: {
+    //       id: userId
+    //     },
+    //     include: {
+    //       FriendRequests: true
+    //     }
+    //   })
+    //   let finalUsers: userType [] = []; 
+    //   if(!!friendRequests[0]?.FriendRequests?.length) {
+    //     friendRequests[0]?.FriendRequests.forEach(async (friend, index) => {
+    //       const friendsRequestId = friend?.friendsRequestId
+    //       let user = await db.user.findMany({
+    //         where: {
+    //           id: friendsRequestId!
+    //         },
+    //       })
+    //       finalUsers.push(user[0])
+    //       if(finalUsers?.length === friendRequests[0]?.FriendRequests?.length){
+    //         resolve (finalUsers)
+    //       }
+    //     })
+    //   }else{
+    //     resolve(finalUsers)
+    //   }
+      
+    // })
+    return await db.$queryRaw`Select uu2.id, uu2.email AS user_email, fk.friends_request_id, uu1.email AS email, uu1."firstName" AS "firstName",
+    uu1."lastName" AS "lastName", uu1."profilePic" AS "profilePic"
+    FROM friend_requests fk
+    JOIN public.user AS uu1 ON uu1.id = fk.friends_request_id
+    JOIN public.user AS uu2 ON uu2.id = fk."userId"
+    where uu2.id = ${userId}`
+  }),
+  acceptRequests: privateProcedure.input(z.object({friendsId: z.string()})).mutation(async ({ctx, input}) => {
     return new Promise(async (resolve, reject) => {
       const {userId, user} = ctx;
-      let friendRequests =  await db.user.findMany({
-        where: {
-          id: userId
-        },
-        include: {
-          FriendRequests: true
-        }
-      })
-      let finalUsers: any = []; 
-      friendRequests[0]?.FriendRequests.forEach(async (friend, index) => {
-        const friendsRequestId = friend?.friendsRequestId
-        let user = await db.user.findMany({
+      try{
+        let deleteFromFriendsTable = await db.friend_requests.delete({
+          // @ts-ignore
           where: {
-            id: friendsRequestId!
-          },
+            AND: [
+              
+              {
+                userId: userId
+              },
+              { 
+                friendsRequestId: input.friendsId
+               },
+            ],
+          } 
         })
-        finalUsers.push(user[0])
-        if(finalUsers?.length === friendRequests[0]?.FriendRequests?.length){
-          resolve ({data: finalUsers})
-        }
-      })
+        resolve({error: false, msg: deleteFromFriendsTable})
+      }catch(err){
+        console.log(err)
+        reject({error: true, msg: err})
+       
+      }
+     
     })
-    
-    // console.log("k", k)
-  }),
-
+  })
 
   // More procedures here
 });
