@@ -13,6 +13,7 @@ export const POST = async (req: NextRequest, res: NextResponse) => {
   const blob = await req.blob();
   const arrayBuffer = await blob.arrayBuffer();
   const buffer = Buffer.from(arrayBuffer);
+  console.log(buffer)
   const headersList = headers()
   const fileName = headersList.get('inputData')
   const userId: any = headersList.get('userid')
