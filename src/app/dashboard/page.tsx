@@ -17,7 +17,7 @@ const Page = async () => {
     })
     if(!dbUser) redirect('/auth-callback?origin=dashboard')
     return(
-       <Dashboard />
+       <Dashboard user={user}/>
     )
 }
 export default Page;

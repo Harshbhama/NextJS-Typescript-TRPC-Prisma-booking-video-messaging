@@ -66,7 +66,7 @@ const Navbar = async ({}) => {
                 <span>Booking Software</span>
               </Link>
               <Link href="/agent-dashboard" >Agent Dashboard</Link>
-              <Link href="/agent-dashboard" >News feed</Link>
+              <Link href="/dashboard" >News feed</Link>
             </div>
             {/* todo: add mobile navbar */}
 

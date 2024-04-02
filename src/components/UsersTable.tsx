@@ -1,6 +1,9 @@
 import { trpc } from "@/app/_trpc/client";
 import { makeUsersTableData } from "@/lib/utils";
 import { userType } from "@/lib/types";
+import WebSocketClient from "./WebSocketClient";
+import ChatWrapper from "./Chat";
+import Link from "next/link";
 import {
     MagnifyingGlassIcon,
     ChevronUpDownIcon,
@@ -95,7 +98,7 @@ import { useEffect, useState } from "react";
     },
   ];
   
-  export function SortableTable() {
+  export function SortableTable({user}: any) {
     const [tabValue, setTabValue] = useState("all");
     const {data: allData, isLoading: allLoading} = trpc.getAllUsers.useQuery();
     console.log("allData",allData)
@@ -130,7 +133,10 @@ import { useEffect, useState } from "react";
         console.log("In Error handler", data);
       }
     })
+    console.log("user",user)
     return (
+      // <WebSocketClient />
+      // <ChatWrapper/ >
       <Card className="h-full w-full">
         <CardHeader floated={false} shadow={false} className="rounded-none">
           <div className="mb-8 flex items-center justify-between gap-8">
@@ -246,7 +252,7 @@ import { useEffect, useState } from "react";
                           )}>Accept Request</Button>
                       </td> : <td className={classes + " flex gap-10"}>
                         <Button className="bg-[#0000ffa6]" >Send Meeting requests</Button>
-                        <Button className="bg-[#008048b3]" >Chat</Button>
+                        <Button className="bg-[#008048b3]" ><Link href={`/chat-user/${user?.id}/${friendsId}`}>Chat</Link></Button>
                       </td>
 
                       }
