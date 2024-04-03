@@ -7,6 +7,7 @@ import SideBar from "@/components/Sidebar";
 import { ThemeProvider } from "@/components/theme-provider";
 import MaxWidthWrapper from "@/components/MaxWidthWrapper";
 import { ToastContainer } from "react-toastify";
+import ContextWrapper from "./ContextWrapper";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -19,6 +20,7 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+
   return (
     <html lang="en">
       <Providers>
@@ -40,16 +42,7 @@ export default function RootLayout({
             <div className="flex flex-col flex-auto">
               {/* @ts-expect-error Server Component */}
               <Navbar />
-              <div className="">
-                {/* <ThemeProvider
-                    attribute="class"
-                    defaultTheme="dark"
-                    enableSystem
-                    disableTransitionOnChange
-                  > */}
-                {children}
-                {/* </ThemeProvider> */}
-              </div>
+              <ContextWrapper>{children}</ContextWrapper>
             </div>
           </div>
         </body>

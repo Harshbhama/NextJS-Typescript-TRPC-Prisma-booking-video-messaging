@@ -1,4 +1,7 @@
+import { UserContext } from "@/app/ContextWrapper";
+import { useContext } from "react";
 const ChatWrapper = () => {
+   const user = useContext(UserContext);
   return(
     <div className="flex-1 p:2 sm:p-6 justify-between flex flex-col min-h-[500px]">
     <div className="flex sm:items-center justify-between py-3 border-b-2 border-gray-200">

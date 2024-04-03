@@ -4,6 +4,7 @@ import { userType } from "@/lib/types";
 import WebSocketClient from "./WebSocketClient";
 import ChatWrapper from "./Chat";
 import Link from "next/link";
+import { UserContext } from "@/app/ContextWrapper";
 import {
     MagnifyingGlassIcon,
     ChevronUpDownIcon,
@@ -28,7 +29,7 @@ import {
   import { tableHead } from "@/lib/types";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
   const TABS = [
     {
       label: "All",
@@ -101,11 +102,12 @@ import { useEffect, useState } from "react";
   export function SortableTable({user}: any) {
     const [tabValue, setTabValue] = useState("all");
     const {data: allData, isLoading: allLoading} = trpc.getAllUsers.useQuery();
-    console.log("allData",allData)
     // @ts-ignore
     let formattedData: tableHead [] | null  = allData ? makeUsersTableData(allData): null;
     const { data: friendRequests } = trpc.getFriendRequest.useQuery()
     const { data: currentFriends} = trpc.getFriends.useQuery()
+    const userContext = useContext(UserContext);
+
     // @ts-ignore
     let formattedRequestsData = friendRequests ? makeUsersTableData(friendRequests): null; 
     // @ts-ignore
@@ -133,7 +135,12 @@ import { useEffect, useState } from "react";
         console.log("In Error handler", data);
       }
     })
-    console.log("user",user)
+    useEffect(() => {
+      userContext.dispatch({
+        type: 'UPDATE_FRIENDS',
+        allFriends: currentFriends
+      })
+    },[currentFriends])
     return (
       // <WebSocketClient />
       // <ChatWrapper/ >
