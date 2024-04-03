@@ -22,3 +22,7 @@ export const makeUsersTableData = (rawData: rawDataType [] | undefined) => {
   })
   return tableHead;
 }
+export const checkForCurrentChatFriend = (data: any, userId: string) => {
+  let nData = data.find(x => x?.f_id === userId)
+  return nData;
+}

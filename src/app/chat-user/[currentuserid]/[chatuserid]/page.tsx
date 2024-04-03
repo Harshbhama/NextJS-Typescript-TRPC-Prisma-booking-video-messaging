@@ -1,15 +1,13 @@
-"use client"
+import { getKindeServerSession } from '@kinde-oss/kinde-auth-nextjs/server';
 interface UserProps {
     params: {
       userid: string
     }
   }
   import ChatWrapper from "@/components/Chat";
-  const Page = ({params}: UserProps) => {
-    console.log(params);
+  const Page = async ({params}: any) => {
     return(
-      // <div>Hello</div>
-      <ChatWrapper />
+      <ChatWrapper params={params}/>
     )
   }
   export default Page;

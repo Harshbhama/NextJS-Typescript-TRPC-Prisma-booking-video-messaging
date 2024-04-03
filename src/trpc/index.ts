@@ -34,10 +34,7 @@ export const appRouter = router({
     return new Promise(async (resolve, reject) => {
       try{
         const {userId, user} = ctx;
-        console.log("userId",userId)
         const data =  await db.$queryRaw`Select * from public.user where email != ${user?.email}`
-        console.log("data",data)
-        // return data
         resolve(data)
       }catch(err){
         reject(err)
@@ -45,15 +42,6 @@ export const appRouter = router({
       
     })
     
-    
-    // return await db.user.findMany({
-    //   where : {
-    //     NOT: {
-    //       id: userId
-    //     }
-    //   }
-    // })
-    // return await db.$queryRaw`Select * from user where id !=${userId} `
   }),
 
   getUserWithId: privateProcedure.query(async({ctx}) => {
@@ -81,7 +69,6 @@ export const appRouter = router({
     left join friend_requests
     on public.user.id = friend_requests."userId"
     where public.user.id = ${input.friendsId} and friends_request_id = ${userId}`
-    console.log("checkForExistingOutgoing",checkForExistingOutgoing)
 
     if(!!checkForExisting?.length || !!checkForExistingOutgoing?.length){
       // throw new TRPCError({code: "NOT_FOUND"})
