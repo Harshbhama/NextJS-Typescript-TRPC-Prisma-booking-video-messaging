@@ -7,30 +7,54 @@ import { checkForCurrentChatFriend } from "@/lib/utils";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
-const ChatWrapper = ({params}: any) => {
+import { useMutation } from "@tanstack/react-query";
+import { addChatMsgToDb } from "@/lib/chatApi";
+const ChatWrapper = ({params, roomNo, tableTransactionId}: any) => {
    const [socket, setSocket] = useState<any>(undefined)
    const [roomName, setRoomName] = useState("")
    const [msg, setOutGoingMsg] = useState("");
    const [receivedMsg, setReceivedMsg] = useState<any>([]);
-   const [currentRoom, setCurrentRoom] = useState<string>("");
-   const [userId, setUserId] = useState<number>(0);
    const user = useContext(UserContext);
    const userFriends = !!user?.allFriend?.length ? user?.allFriend : trpc.getFriends.useQuery()?.data;
    const chatUserDetails = userFriends ? checkForCurrentChatFriend(userFriends, params?.chatuserid): null;
    const cUserDetails = trpc.getUserWithId.useQuery()?.data;
-
+   const {mutate: addChatToDb} = useMutation({ // Using React Query approach
+      mutationFn: async (params: any) => {
+        const response = await addChatMsgToDb(params);
+        return response;
+      },
+      onError: (error, variables, context) => {
+        console.log(error)
+      },
+      onSuccess: (data: any, variables, context) => {
+        console.log(data);
+      },
+    })
    const handleSendMessage = () => {
       if(socket){
         socket.emit("message", msg, roomName, cUserDetails?.id)
+        addChatToDb({
+         userId: cUserDetails?.id,
+         message: msg,
+         tableTransactionId: tableTransactionId
+        })
       }
     }
-    const handleJoinRoom = () => {
+    const handleJoinRoom = (roomName: number) => {
       socket.emit("joinedRoom", roomName)
     }
     useEffect(() => {
       const socket = io("http://localhost:8000")
       setSocket(socket)
     },[])
+
+    useEffect(() => {
+      if(socket && roomNo){
+         setRoomName(roomNo);
+         handleJoinRoom(roomNo);
+      }
+    },[roomNo, socket])
+
     useEffect(() => {
       if(socket){
         socket.on("message", (message: string, roomNameReceived: string, userId: number) => {
@@ -38,7 +62,6 @@ const ChatWrapper = ({params}: any) => {
           newMsg.push({message: message,   userId: userId})
           console.log("newMsg",newMsg)
           setReceivedMsg(newMsg)
-          setCurrentRoom(roomNameReceived)
         })
       }
       console.log("receivedMsg",receivedMsg)

@@ -41,3 +41,21 @@ model agent_iternary {
   user_id     String?
   user        user?    @relation(fields: [user_id], references: [id])
 }
+
+model user_chat {
+  first_user               String         @unique
+  second_user              String         @unique
+  unique_table_transaction String         @id
+  chat_check               Boolean
+  room_no                  Int            @unique @default(autoincrement())
+  user_message             user_message[]
+}
+
+model user_message {
+  id                                 String     @id
+  message                            String
+  createdAt                          DateTime   @default(now())
+  user                               String     @unique
+  user_chat_unique_table_transaction String?
+  user_chat                          user_chat? @relation(fields: [user_chat_unique_table_transaction], references: [unique_table_transaction])
+}
