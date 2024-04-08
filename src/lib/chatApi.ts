@@ -35,3 +35,22 @@ export const addChatMsgToDb = (params: any) => {
         })
   });
 };
+export const getUserMsg = (params: any) => {
+  return new Promise((resolve, reject) => {
+    axios('http://localhost:4000/chat/getUserMessage', {
+          method: 'GET',
+          data:  {
+            user_chat_unique_table_transaction: params?.transactionId
+          },
+          headers: {
+            userid: params?.userId
+          },
+        })
+      .then(res => {
+            console.log("res",res)
+            resolve(res);
+      }).catch(err => {
+          reject(true);
+      })
+  })
+}

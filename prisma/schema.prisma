@@ -13,7 +13,7 @@ model user {
   firstName      String
   lastName       String
   profilePic     String
-  isAgent        Boolean
+  isAgent        Boolean?
   agent_iternary agent_iternary[]
   FriendRequests friend_requests[]
   Friends        friends[]
@@ -35,27 +35,27 @@ model friend_requests {
 
 model agent_iternary {
   iternary_id String   @id
+  user_id     String?
   title       String?
   description String?
   images      String[]
-  user_id     String?
   user        user?    @relation(fields: [user_id], references: [id])
 }
 
 model user_chat {
+  unique_table_transaction String         @id
   first_user               String         @unique
   second_user              String         @unique
-  unique_table_transaction String         @id
-  chat_check               Boolean
   room_no                  Int            @unique @default(autoincrement())
+  chat_check               Boolean
   user_message             user_message[]
 }
 
 model user_message {
   id                                 String     @id
+  user_chat_unique_table_transaction String?
   message                            String
   createdAt                          DateTime   @default(now())
-  user                               String     @unique
-  user_chat_unique_table_transaction String?
+  userId                             String     @unique
   user_chat                          user_chat? @relation(fields: [user_chat_unique_table_transaction], references: [unique_table_transaction])
 }
