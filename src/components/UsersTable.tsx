@@ -260,9 +260,8 @@ import { useContext, useEffect, useState } from "react";
                           )}>Accept Request</Button>
                       </td> : <td className={classes + " flex gap-10"}>
                         <Button className="bg-[#0000ffa6]" >Send Meeting requests</Button>
-                        <Button className="bg-[#008048b3]"><Link href={`/chat-user/${user?.id}/${friendsId}`}>Chat</Link></Button>
+                        <Link href={`/chat-user/${user?.id}/${friendsId}`}><Button className="bg-[#008048b3]">Chat</Button></Link>
                       </td>
-
                       }
                     </tr>
                   );

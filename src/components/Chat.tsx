@@ -10,6 +10,7 @@ import { io } from "socket.io-client";
 import { useMutation } from "@tanstack/react-query";
 import { addChatMsgToDb } from "@/lib/chatApi";
 import { getUserMsg } from "@/lib/chatApi";
+import { isArray } from "util";
 const ChatWrapper = ({params, roomNo, tableTransactionId}: any) => {
    const [socket, setSocket] = useState<any>(undefined)
    const [roomName, setRoomName] = useState("")
@@ -19,8 +20,12 @@ const ChatWrapper = ({params, roomNo, tableTransactionId}: any) => {
    const userFriends = !!user?.allFriend?.length ? user?.allFriend : trpc.getFriends.useQuery()?.data;
    const chatUserDetails = userFriends ? checkForCurrentChatFriend(userFriends, params?.chatuserid): null;
    const cUserDetails = trpc.getUserWithId.useQuery()?.data;
-   const { data: chatMsgFromBackend, status } = useQuery(["chat_msg"], () => getUserMsg({transactionId: tableTransactionId}));
-   // console.log("chatMsgFromBackend",chatMsgFromBackend?.data?.result);
+   const { data: chatMsgFromBackend, status } = useQuery<any>(["chat_msg"], () => getUserMsg({transactionId: tableTransactionId}));
+
+   useEffect(() => {
+    let result = chatMsgFromBackend?.data?.result
+    setReceivedMsg(result)
+   },[chatMsgFromBackend?.data?.result])
    const {mutate: addChatToDb} = useMutation({ // Using React Query approach
       mutationFn: async (params: any) => {
         const response = await addChatMsgToDb(params);
@@ -59,7 +64,7 @@ const ChatWrapper = ({params, roomNo, tableTransactionId}: any) => {
     },[roomNo, socket])
 
     useEffect(() => {
-      if(socket){
+      if(socket && isArray(receivedMsg)){
         socket.on("message", (message: string, roomNameReceived: string, userId: number) => {
           let newMsg = [...receivedMsg]
           newMsg.push({message: message,   userId: userId})
@@ -172,7 +177,7 @@ const ChatWrapper = ({params, roomNo, tableTransactionId}: any) => {
               <div className={`flex items-end ${msg?.userId === cUserDetails?.id ? '' : 'justify-end'}`}>
                 <div className={`flex flex-col space-y-2 text-xs max-w-xs mx-2 order-2 items-start`}>
                   <div>
-                    <span className={`px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600 ${msg?.userId === cUserDetails?.id ? '' : 'bg-blue-600 !text-white'}`}>
+                    <span className={`px-4 py-2 rounded-lg inline-block rounded-bl-none bg-gray-300 text-gray-600 ${msg?.userId === cUserDetails?.id ? '' : '!bg-blue-600 !text-white'}`}>
                       {msg?.message}
                     </span>
                   </div>

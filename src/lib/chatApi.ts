@@ -39,11 +39,8 @@ export const getUserMsg = (params: any) => {
   return new Promise((resolve, reject) => {
     axios('http://localhost:4000/chat/getUserMessage', {
           method: 'GET',
-          data:  {
-            user_chat_unique_table_transaction: params?.transactionId
-          },
           headers: {
-            userid: params?.userId
+            user_chat_unique_table_transaction: params?.transactionId
           },
         })
       .then(res => {

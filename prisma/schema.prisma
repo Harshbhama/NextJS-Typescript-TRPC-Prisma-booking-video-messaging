@@ -56,6 +56,6 @@ model user_message {
   user_chat_unique_table_transaction String?
   message                            String
   createdAt                          DateTime   @default(now())
-  userId                             String     @unique
+  userId                             String
   user_chat                          user_chat? @relation(fields: [user_chat_unique_table_transaction], references: [unique_table_transaction])
 }
