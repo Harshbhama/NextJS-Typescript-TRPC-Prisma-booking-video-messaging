@@ -114,7 +114,6 @@ import { useContext, useEffect, useState } from "react";
     // @ts-ignore
     let formattedFriends = currentFriends ? makeUsersTableData(currentFriends) : null;
     formattedData = tabValue === "all" ? formattedData : tabValue === "requests" ? formattedRequestsData : formattedFriends
-    
     const utils = trpc.useContext()
     const {mutate: addFriendRequest} = trpc.sendFriendRequest.useMutation({
       onSuccess: (data) => {

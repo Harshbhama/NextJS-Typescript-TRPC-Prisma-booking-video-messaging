@@ -4,6 +4,7 @@ export interface rawDataType {
     firstName: string;
     lastName: string;
     profilePic: string;
+    is_online: boolean
   }
 export interface tableHead {
     name: string;

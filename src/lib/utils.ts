@@ -10,13 +10,14 @@ export const onUploadSnap = (ref: any) => {
   ref.current.click()
 }
 export const makeUsersTableData = (rawData: rawDataType [] | undefined) => {
+
   let tableHead: tableHead [] = []
   rawData!.forEach((tableData, index) => {
     tableHead.push({
       name: tableData?.firstName + " " + tableData?.lastName,
       email: tableData?.email,
       img: tableData?.profilePic,
-      online: true,
+      online: tableData?.is_online,
       friendsId: tableData?.id
     })
   })

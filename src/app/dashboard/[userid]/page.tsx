@@ -8,8 +8,7 @@ interface UserProps {
 }
 const Page = ({params}: UserProps) => {
   return(
-      
-      <div className="container " >
+    <div className="container " >
       <UsersInfoForm userid={params.userid}/>
     </div>
   )
